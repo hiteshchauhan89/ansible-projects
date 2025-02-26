@@ -1,0 +1,57 @@
+---
+- name: Install and Configure Nginx with Firewall and Custom Web Page (RHEL)
+  hosts: test
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      dnf:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Ensure /usr/share/nginx/html directory exists
+      file:
+        path: /usr/share/nginx/html
+        state: directory
+        owner: nginx
+        group: nginx
+        mode: '0755'
+
+    - name: Deploy custom HTML webpage
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Welcome to My Ansible Deployed Nginx!</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      text-align: center;
+                      margin-top: 50px;
+                  }
+                  h1 {
+                      color: blue;
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>Welcome to My Website!</h1>
+              <p>This webpage was deployed using Ansible.</p>
+          </body>
+          </html>
+        dest: /usr/share/nginx/html/index.html
+        owner: nginx
+        group: nginx
+        mode: '0644'
+
+    - name: Restart Nginx to apply changes
+      service:
+        name: nginx
+        state: restarted
