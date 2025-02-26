@@ -1,0 +1,26 @@
+---
+- name: Uninstall Nginx and Remove Configuration (RHEL)
+  hosts: webserver
+  become: yes
+
+  tasks:
+    - name: Stop Nginx service
+      service:
+        name: nginx
+        state: stopped
+        enabled: no
+
+    - name: Uninstall Nginx
+      dnf:
+        name: nginx
+        state: absent
+
+    - name: Remove Nginx configuration files
+      file:
+        path: /etc/nginx
+        state: absent
+
+    - name: Remove Nginx default web directory
+      file:
+        path: /usr/share/nginx/html
+        state: absent
