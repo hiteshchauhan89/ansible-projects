@@ -1,0 +1,20 @@
+---
+- name: Install Nginx
+  hosts: webserver
+  become: true
+
+  tasks:
+    - name: Update DNF cache
+      dnf:
+        update_cache: yes
+
+    - name: Install Nginx
+      dnf:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes

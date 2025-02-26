@@ -1,0 +1,15 @@
+---
+- name: Install Nginx
+  hosts: test
+  become: true
+
+- name: Install Nginx
+      dnf:
+        name: nginx
+        state: present
+
+- name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
