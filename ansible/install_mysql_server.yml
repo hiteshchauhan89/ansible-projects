@@ -1,0 +1,10 @@
+---
+- name: Install MySQL Server
+  hosts: db_server
+  become: true
+
+  tasks:
+    - name: Install MySQL Server
+      dnf:
+        name: mysql-server
+        state: latest
