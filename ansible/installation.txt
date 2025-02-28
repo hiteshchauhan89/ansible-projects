@@ -1,0 +1,7 @@
+How to Install the ansible in redhat 
+
+Step 1 : sudo yum update
+
+Step 2: cat /etc/os-release
+
+Step 3: dnf install ansible-core
