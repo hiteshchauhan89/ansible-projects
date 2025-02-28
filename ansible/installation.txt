@@ -14,3 +14,292 @@ sudo apt update
 sudo apt install software-properties-common
 sudo add-apt-repository --yes --update ppa:ansible/ansible
 sudo apt install ansible
+
+=================================================================
+
+sudo apt update
+sudo apt install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+
+
+
+[webservers]
+10.5.0.14
+[dbservers]
+10.5.0.15
+
+
+
+
+------------------------------
+
+Playbook
+
+I want to write a playbook for Nginx Installation and configuration
+-----------------------------------------------------------------------
+
+
+---
+
+- name: Install Nginx
+  hosts: webservers
+  become: true
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+==========================
+
+---
+- name: Install and Configure Nginx with Firewall and Custom Web Page
+  hosts: webservers
+  become: true
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Allow HTTP and HTTPS through UFW firewall
+      ufw:
+        rule: allow
+        name: "Nginx Full"
+
+    - name: Ensure /var/www/html directory exists
+      file:
+        path: /var/www/html
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: Deploy custom HTML webpage
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Welcome to My Ansible Deployed Nginx!</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      text-align: center;
+                      margin-top: 50px;
+                  }
+                  h1 {
+                      color: blue;
+                  }
+              </style>
+          </head>
+          <body>
+              <h1>Welcome to My Website!</h1>
+              <p>This webpage was deployed using Ansible.</p>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: Restart Nginx to apply changes
+      service:
+        name: nginx
+        state: restarted
+
+
+--------------------------------------------------------------------
+
+
+Un-install ANY S/W
+-------------------------
+
+1: Stop the Service
+2: Uninstall the S/W
+3: Delete all the COnfig FIles
+
+Playbook
+-----------
+
+---
+- name: Uninstall and Remove Nginx Completely
+  hosts: webservers
+  become: yes
+
+  tasks:
+
+    - name: Stop Nginx service
+      service:
+        name: nginx
+        state: stopped
+
+    - name: Disable Nginx from starting at boot
+      service:
+        name: nginx
+        enabled: no
+
+    - name: Remove Nginx package
+      apt:
+        name: nginx
+        state: absent
+        purge: yes
+
+    - name: Remove Nginx web directory
+      file:
+        path: /var/www/html
+        state: absent
+
+    - name: Remove Nginx logs
+      file:
+        path: /var/log/nginx
+        state: absent
+
+    - name: Remove Nginx cache
+      file:
+        path: /var/cache/nginx
+        state: absent
+
+    - name: Deny HTTP and HTTPS access in UFW firewall
+      ufw:
+        rule: deny
+        name: "Nginx Full"
+
+    - name: Deny HTTP and HTTPS access in UFW firewall
+      ufw:
+        rule: deny
+        name: "Nginx Full"
+
+
+==================================================================
+sudo vi install_mysql.yml
+
+---
+- name: Install MySQL on Ubuntu
+  hosts: dbservers
+  become: yes
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install MySQL server
+      apt:
+        name: mysql-server
+        state: present
+
+    - name: Start and enable MySQL service
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+=====================================================
+
+Ansinble Variables
+---------------------------------
+
+my IP address 
+
+Ansible variables allow you to store and reuse values dynamically in a playbook.
+This improves code reusability, readability, and flexibility.
+
+=========================================================================================================
+
+---
+- name: Install and Configure Nginx
+  hosts: webservers
+  become: yes
+  vars:
+    my_package: "nginx"
+    nginx_service: "nginx"
+    nginx_index_file: "/var/www/html/index.html"
+    welcome_message: "<h1>Welcome to My Nginx Server</h1>"
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: "{{ my_package }}"
+        state: present
+        update_cache: yes
+      notify: Restart Nginx
+
+    - name: Copy index.html to the web server
+      copy:
+        content: "{{ welcome_message }}"
+        dest: "{{ nginx_index_file }}"
+        mode: '0644'
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: "{{ nginx_service }}"
+        state: restarted
+
+
+
+10.5.0.14
+
+[webservers]
+10.5.0.14 ansible_user=kumar
+
+------------------------------
+
+vi nginx_vars.yml
+
+nginx_package: "nginx"
+nginx_service: "nginx"
+nginx_index_file: "/var/www/html/index.html"
+welcome_message: "<h1>Welcome to My Nginx Server</h1>"
+
+
+---
+- name: Install and Configure Nginx
+  hosts: webservers
+  become: yes
+  vars_files:
+    - nginx_vars.yml
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: "{{ nginx_package }}"
+        state: present
+        update_cache: yes
+      notify: Restart Nginx
+
+    - name: Copy index.html to the web server
+      copy:
+        content: "{{ welcome_message }}"
+        dest: "{{ nginx_index_file }}"
+        mode: '0644'
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: "{{ nginx_service }}"
+        state: restarted
