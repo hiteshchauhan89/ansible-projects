@@ -1,0 +1,105 @@
+# Tasks To Be Performed:
+1. Create 2 Ansible roles
+2. Install Apache2 on slave1 using one role and NGINX on slave2 using the
+other role
+3. Above should be implemented using different Ansible roles
+
+Go To AWS Management Comsole And create 3 ec2 instances 1 is master node and 2 is slave node.
+Install the ansible in master node 
+
+sudo apt update-y 
+sudo apt install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+
+Then go to cd /etc/ansible in ansible master server
+
+sudo nano hosts
+[werserver]
+xxx.xxx.xxx.xxx(mention here your ip address)
+[prod]
+xxx.xxx.xxx.xxx(mention here your ip address)
+
+then save it
+
+Before we need to below task completion
+Now Need to create the passwordless ssh slave 1 and slave 2
+go to master server and type the command ssh-keygeb -t rsa
+after rune this command go to cd /.ssh/
+cat id_rsa.pub and copy this key
+
+and paste in slave 1 and slave in path  /home/ubuntu/.ssh/
+and cat authorized_key
+paste here key you have just copy and save it then exit this file 
+then type command ssh xxx.xxx.xxx.xxx(ip address of your machine)
+if you asked some popup just type yes 
+
+Now you got connected your machine with ansible master with passwordless authentication.
+
+then run this command 
+ansible -m ping all
+
+#1.	Create 2 Ansible roles
+
+To create ansible roles:
+sudo ansible-galaxy init apache
+sudo ansible-galaxy init nginx
+
+#2. Install Apache2 on slave1 using one role and NGINX on slave2 using the other role
+path of Ansible Apache role
+/etc/ansible/roles/apache/tasks/
+path of Ansible nginx role
+/etc/ansible/roles/nginx/tasks/
+add the yaml playbook files inside tasks
+
+First need to set the apache task
+
+So to this path /etc/ansible/roles/apache/tasks/ here You need to create the file name is install.yaml
+
+ sudo nano install.yaml write this code and save it then exit this file
+---
+-	name: install apache
+apt:
+ name: apache2
+  state: present
+Then after you will main.yaml file open this file 
+Sudo nano main.yaml.write this code in main.yaml and save it this and exit from file.
+ ---
+-	name: include apache installation tasks
+include_tasks: install.yaml
+
+Then go to /etc/ansible/roles/nginx/tasks/ path 
+Create one file like install.yaml.write this code 
+---
+-	 name: Install Nginx
+apt:
+   name: nginx
+    state: present
+Sudo nano main.yaml.write this code in main.yaml and save it this and exit from file.
+ ---
+-	name: include Nginx installation tasks
+include_tasks: install.yaml
+
+      Then go to this path cd /etc/ansible and create one more file for installing 
+     Apache and nginx like name is play.yaml
+
+finally create a playbook to execute the tasks of the role and write this below code in play.yaml
+---
+— name: installing apache2
+hosts: webserver
+become: true
+roles:
+— apache
+
+- name: installing nginx
+hosts: prod
+become: true
+roles:
+— nginx
+
+Now Save it this yaml.we need to deploy the both apache and nginx through role based.
+Now Run this command.the command is
+ansible-playbook play3.yaml
+After complete the deployment go to aws instance and copy the public ip and paste it to browser.
+
+
