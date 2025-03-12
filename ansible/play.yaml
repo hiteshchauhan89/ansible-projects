@@ -1,0 +1,12 @@
+---
+- name: Installing Apache2
+  hosts: webserver
+  become: true
+  roles:
+    - apache
+
+- name: Installing Nginx
+  hosts: prod
+  become: true
+  roles:
+    - nginx
