@@ -1,0 +1,19 @@
+# install the java 
+---
+- name: Installing Java
+hosts: test
+become: true
+tasks:
+- name: Install Java
+apt:
+name: openjdk-11-jdk
+state: latest
+# install mysql
+- name: Installing MySQL
+hosts: prod
+become: true
+tasks:
+- name: Install MySQL
+apt:
+name: mysql-server
+state: latest
