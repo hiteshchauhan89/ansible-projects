@@ -1,0 +1,3 @@
+---
+- name: copy index.html
+  copy: src=/etc/ansible/roles/apache/files/index.html dest=/var/www/html
